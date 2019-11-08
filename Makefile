@@ -2,12 +2,12 @@ SRCDIR         = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 SHELL          = /bin/bash
 ARGS           = $(filter-out $@,$(MAKECMDGOALS))
 
-PHP_VERSION     ?= 7.0
-PHALCON_VERSION ?= v3.4.4
-BUILD_ID        ?= $(shell /bin/date "+%Y%m%d-%H%M%S")
+PHP_VERSION           ?= 7.2
+PHALCON_VERSION       ?= v3.4.5
+PHALCON_MAJOR_VERSION ?= 34
+BUILD_ID              ?= $(shell /bin/date "+%Y%m%d-%H%M%S")
 
-IMAGE_NAME     = klay/mkimage
-IMAGE_BASE_TAG = ubuntu-16.04
+IMAGE_NAME     = gamalan/mkimage
 
 .SILENT: ;               # no need for @
 .ONESHELL: ;             # recipes execute in same shell
@@ -35,7 +35,7 @@ endif
 .PHONY: docker-build
 docker-build:
 	docker build \
-		-t $(IMAGE_NAME):$(IMAGE_BASE_TAG)-php-$(PHP_VERSION) \
+		-t $(IMAGE_NAME):php$(PHP_VERSION)-phalcon$(PHALCON_MAJOR_VERSION) \
 		--label build_id=$(BUILD_ID) \
 		--pull \
 		--build-arg PHP_VERSION=$(PHP_VERSION) \
@@ -51,7 +51,7 @@ push: do-push post-push
 
 .PHONY: do-push
 do-push:
-	docker push $(IMAGE_NAME):$(IMAGE_BASE_TAG)-php-$(PHP_VERSION)
+	docker push $(IMAGE_NAME):php$(PHP_VERSION)-phalcon$(PHALCON_MAJOR_VERSION)
 
 .PHONY: post-push
 post-push:
