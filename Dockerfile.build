@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.04
 
 ARG PHP_VERSION
 ARG PHALCON_VERSION
@@ -12,9 +12,7 @@ WORKDIR $BUILD_HOME
 
 RUN apt-get update -y \
 	&& apt-get install -y --no-install-recommends \
-		software-properties-common \
-		python-software-properties \
-		software-properties-common \
+		software-properties-common \ 
 		ca-certificates \
 		apt-transport-https \
 		apt-utils \
@@ -64,19 +62,6 @@ RUN git clone --depth=1 -q https://github.com/phalcon/cphalcon.git -b $PHALCON_V
 	&& ./install --phpize /usr/bin/phpize$PHP_VERSION --php-config /usr/bin/php-config$PHP_VERSION \
 	&& cp `php-config --extension-dir`/phalcon.so $ARTIFACTS_PATH/usr/lib/php/`php-config --phpapi`/phalcon.so \
 	&& cp $BUILD_HOME/cphalcon/tests/_ci/phalcon.ini $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/phalcon.ini
-
-# Aerospike
-RUN git clone --depth=1 -q https://github.com/aerospike/aerospike-client-php -b master $BUILD_HOME/aerospike-client-php \
-	&& cd $BUILD_HOME/aerospike-client-php/src \
-	&& chmod +x build.sh \
-	&& ./build.sh --loglevel OFF \
-	&& make install \
-	&& cp $BUILD_HOME/aerospike-client-php/src/modules/aerospike.so $ARTIFACTS_PATH/usr/lib/php/`php-config --phpapi`/aerospike.so \
-	&& echo "[Aerospike]" >> $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/aerospike.ini \
-	&& echo "; Note: To use aerospike extension you have to install libssl-dev package" >> $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/aerospike.ini \
-	&& echo "extension=aerospike.so" >> $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/aerospike.ini \
-	&& echo "aerospike.udf.lua_system_path=/usr/local/aerospike/lua" >> $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/aerospike.ini \
-	&& echo "aerospike.udf.lua_user_path=/usr/local/aerospike/usr-lua" >> $ARTIFACTS_PATH/etc/php/$PHP_VERSION/mods-available/aerospike.ini
 
 # PHP HandlerSocket
 RUN git clone --depth=1 -q https://github.com/tony2001/php-ext-handlersocketi.git -b badoo-7.0 $BUILD_HOME/php-ext-handlersocketi \

@@ -2,7 +2,7 @@ SRCDIR         = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 SHELL          = /bin/bash
 ARGS           = $(filter-out $@,$(MAKECMDGOALS))
 
-PHP_VERSION           ?= 7.2
+PHP_VERSION           ?= 7.3
 PHALCON_VERSION       ?= v3.4.5
 PHALCON_MAJOR_VERSION ?= 34
 BUILD_ID              ?= $(shell /bin/date "+%Y%m%d-%H%M%S")
@@ -18,7 +18,7 @@ Makefile: ;              # skip prerequisite discovery
 # Public targets
 
 .PHONY: build
-build: pre-build docker-build post-build
+build: pre-build docker-build
 
 .PHONY: pre-build
 pre-build: check
@@ -34,30 +34,20 @@ endif
 
 .PHONY: docker-build
 docker-build:
-	docker build \
+	docker buildx build \
 		-t $(IMAGE_NAME):php$(PHP_VERSION)-phalcon$(PHALCON_MAJOR_VERSION) \
+		--platform "linux/amd64,linux/arm64,linux/arm/v7" \
 		--label build_id=$(BUILD_ID) \
 		--pull \
 		--build-arg PHP_VERSION=$(PHP_VERSION) \
 		--build-arg PHALCON_VERSION=$(PHALCON_VERSION) \
+		--push \
+		--network=host \
 		. \
 		-f Dockerfile.build
 
 .PHONY: release
-release: build push
-
-.PHONY: push
-push: do-push post-push
-
-.PHONY: do-push
-do-push:
-	docker push $(IMAGE_NAME):php$(PHP_VERSION)-phalcon$(PHALCON_MAJOR_VERSION)
-
-.PHONY: post-push
-post-push:
-
-.PHONY: clean
-clean:
+release: build clean
 
 .SECONDARY: clean
 
